@@ -35,9 +35,9 @@ conditions.
 | Metric | Baseline | + Simulator | Δ |
 |---|---|---|---|
 | AUC_clean | 0.9811 | 0.9791 | −0.0020 |
-| AUC_robust | 0.9341 | **0.9581** | **+0.0240** |
-| **FINAL** | 0.9576 | **0.9686** | **+0.0110** |
-| Accuracy, robust mean | 0.7797 | **0.8921** | +0.1124 |
+| AUC_robust | 0.9330 | **0.9582** | **+0.0252** |
+| **FINAL** | 0.9570 | **0.9686** | **+0.0116** |
+| Accuracy, robust mean | 0.7801 | **0.8922** | +0.1121 |
 | Worst-case accuracy | 0.5480 | **0.8147** | +0.2667 |
 | Accuracy spread across conditions | 0.3900 | **0.1133** | −0.2767 |
 
@@ -51,7 +51,7 @@ coin flip on a balanced task — to 0.815.
 |---|---|
 | Single prediction | 0.9785 |
 | 5-view mean (TTA) | **0.9853** |
-| Most-stable half | **0.9974** |
+| Most-stable half | **0.9977** |
 | Least-stable half | 0.9538 |
 
 **94% of all errors fall in the least-stable half.** Flagging that half for
@@ -64,9 +64,9 @@ Full per-condition breakdown and interpretation:
 
 | Configuration | AUC_clean | AUC_robust | FINAL |
 |---|---|---|---|
-| Linear probe, no augmentation | 0.9811 | 0.9341 | 0.9576 |
+| Linear probe, no augmentation | 0.9811 | 0.9330 | 0.9570 |
 | + chained augmentation, 2k sources | 0.9630 | 0.9359 | 0.9494 |
-| + chained augmentation, 10k sources | 0.9791 | 0.9581 | **0.9686** |
+| + chained augmentation, 10k sources | 0.9791 | 0.9582 | **0.9686** |
 | + passport TTA | 0.9853 | — | — |
 
 The middle row is included deliberately. Our first augmented model appeared to
@@ -209,9 +209,7 @@ datasets that already label synthetic images as 1.
 ├── notebooks/techjam.ipynb
 ├── results/
 │   ├── Robustness_Evaluation_Summary.docx
-│   ├── robustness_comparison.csv
-│   ├── false_positives.png
-│   └── false_negatives.png
+│   └── Error_Analysis_Note.docx
 └── requirements.txt
 ```
 
@@ -227,7 +225,7 @@ Our twelve most confident false positives — real photographs scored 0.97 to
 background**. Four birds and two aircraft against open sky; a horse against pale
 cloud; a cat against a blank wall. This is the compositional signature of a
 generated image, and the classifier applies it to real photographs that happen
-to share it. See `results/false_positives.png`.
+to share it.
 
 The cause is resolution. CIFAKE images are 32×32, upsampled 7× to reach the
 backbone's 224×224 input, so no generator-level frequency artifact survives. A
@@ -278,6 +276,10 @@ deadline, and the results support that choice.
 failure, tuning the threshold on a held-out degraded set is likely a
 significant and nearly free gain. `evaluate.threshold_sweep()` produces the
 FPR/FNR curve.
+
+**Run-to-run variance.** Noise augmentation uses an unseeded random generator,
+so the three noise conditions vary by roughly 0.01 AUC between runs. All figures
+here are from the run recorded in the notebook.
 
 ---
 
